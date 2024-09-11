@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Resume</title>
+</head>
+<body>
+    <h1>Upload your resume</h1>
+    <form id="resumeForm" method="POST" enctype="multipart/form-data">
+        <input type="file" id="resume" name="resume" accept=".pdf, .docx" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <pre id="responseData"></pre>
+
+    <script>
+        document.getElementById('resumeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var formData = new FormData();
+            var fileInput = document.getElementById('resume');
+            formData.append('resume', fileInput.files[0]);
+
+            fetch('/api/extract_resume/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => {
+                        throw new Error('Error: ' + text);
+                    });
+                }
+            })
+            .then(data => {
+                document.getElementById('responseData').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('responseData').textContent = 'Error: ' + error.message;
+            });
+        });
+    </script>
+</body>
+</html>
