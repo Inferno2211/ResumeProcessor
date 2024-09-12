@@ -12,16 +12,16 @@ def upload_resume(request):
     return render(request, 'upload_resume.html')
 
 class ExtractResumeAPIView(APIView):
-    parser_classes = [MultiPartParser]  # To handle file uploads
+    parser_classes = [MultiPartParser]  # file uploads
 
     def post(self, request, format=None):
-        # Check if 'resume' is in the request files
+        #handle no file provided
         if 'resume' not in request.FILES:
             return Response({"error": "No file provided."}, status=status.HTTP_400_BAD_REQUEST)
 
         file = request.FILES['resume']
         
-        # Ensure the file was successfully uploaded
+        # upload file
         try:
             file_name = file.name
             file_extension = os.path.splitext(file_name)[1]
@@ -30,26 +30,25 @@ class ExtractResumeAPIView(APIView):
                 return Response({"error": "Unsupported file format. Please upload a PDF or DOCX."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
-            # Create a temporary file to store the uploaded resume
+            # temp file to store the uploaded resume
             with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
                 for chunk in file.chunks():
                     temp_file.write(chunk)
 
                 temp_file_path = temp_file.name
 
-            # Load the spacy language model
             nlp = spacy.load("en_core_web_sm")  # Load the model
 
-            # Parse the resume using pyresparser
+            # Parse resume
             data = ResumeParser(temp_file_path).get_extracted_data()
 
-            # Remove the temporary file after parsing
+            # Remove the temp file
             os.remove(temp_file_path)
 
             if not data:
                 return Response({"error": "Failed to parse the resume."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            # Return the extracted data (e.g., name, email, phone)
+            # Return data 
             return Response({
                 "first_name": data.get('name', 'N/A'),
                 "email": data.get('email', 'N/A'),

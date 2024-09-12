@@ -78,8 +78,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'resume_processor',
-        'USER': 'your_db_user',
-        'PASSWORD': 'your_db_password',
+        'USER': 'postgres',
+        'PASSWORD': 'abir2211',
         'HOST': 'localhost',
         'PORT': '5432',
     }
